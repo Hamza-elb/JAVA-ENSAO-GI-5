@@ -10,12 +10,16 @@ public class ProductComparator implements Comparator<Product> {
 	}
 	
 	public ProductComparator(boolean byPrice) {
+
 		this.byPrice = byPrice;
 	}
 	
 	@Override
 	public int compare(Product productA, Product productB) {
-		throw new ToBeCompletedException("if 'byPrice' is false compare products using their names," +
-				" use the price otherwise");
+		//Comparator<Product>
+		if(byPrice){
+			return Comparator.comparing(Product::getPrice).compare(productA, productB);
+		}
+		return Comparator.comparing(Product::getName).compare(productA, productB);
 	}
 }

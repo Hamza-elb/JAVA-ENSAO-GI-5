@@ -1,47 +1,61 @@
 package com.ensao.java.advanced.exercices.product;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Stock extends TreeSet<Product> {
 	private static final ProductComparator COMPARATOR = new ProductComparator();
-	
+
+	public Stock(Comparator<Product> comparator) {
+		super(comparator);
+	}
+	public Stock() {
+		this(COMPARATOR);
+	}
+
 	public Stock filter(Predicate<Product> predicate) {
-		throw new ToBeCompletedException("Return a Stock instance containing products " +
-				"to which is applied the predicate");
+		return this.stream()
+				.filter(predicate)
+				.collect(Collectors.toCollection(Stock::new));
+	}
+
+	public Stock inverserFiltre(Predicate<Product> predicate) {
+		return filter(predicate.negate());
 	}
 	
-	public void discount(Discount discount) {
-		
-		throw new ToBeCompletedException("apply a discount function " +
-				" do not apply discount if discount amount is > 1 or < 0");
+	public void discount(Discount discount, double b) {
+		Consumer<Product> consumer = product -> discount.discount(product, b);
+		this.forEach(consumer);
 	}
 	
 	public <R> Collection<R> map(Function<Product, R> mapper) {
-		throw new ToBeCompletedException("Retrun a collection of mapped property " +
-				"of type 'R' of a product");
+		return this.stream()
+				.map(mapper)
+				.collect(Collectors.toList());
 	}
 	
 	public void print(ProductPrinter printer) {
-		throw new ToBeCompletedException("using the 'printer', print the products in this stock");
+		this.stream().forEach(printer::print);
 	}
 	
 	public Map<String, Product> groupByCategory() {
-		throw new ToBeCompletedException("Retrun a map of a stock of products grouped by the category");
+		return this.stream()
+				.collect(Collectors.toMap(Product::getCategory, Function.identity()));
 		
 	}
-	
-	public Object findProduct(String name) {
-		throw new ToBeCompletedException("Look for a product having the name 'name' if found");
+	Optional<Product> findProduct(String name) {
+		return this.stream()
+				.filter(product -> product.getName().equals(name))
+				.findFirst();
 	}
 	
 	public Stock moreExpensiveThan(Product product) {
-		throw new ToBeCompletedException("return a new Stock of products" +
-				" that are more expensive that a given product");
+		return this.stream()
+				.filter(p -> p.getPrice() > product.getPrice())
+				.collect(Collectors.toCollection(Stock::new));
 	}
 	
 	public Collection<Product> sorted() {
